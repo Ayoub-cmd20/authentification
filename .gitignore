@@ -1,0 +1,12 @@
+node_modules
+dist
+*.log
+artifacts
+cache
+typechain-types
+.env
+.env.*
+!.env.example
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep
+apps/api/prisma/migrations

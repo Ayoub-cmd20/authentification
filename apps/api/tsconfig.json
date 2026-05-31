@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": ".",
+    "outDir": "./dist",
+    "types": ["node", "express"],
+    "noEmit": false
+  },
+  "include": ["src/**/*.ts", "prisma/seed.ts"]
+}

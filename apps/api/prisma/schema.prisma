@@ -1,0 +1,397 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  UNIVERSITY_ADMIN
+  INSTITUTION
+  MINISTRY_ADMIN
+  SUPER_ADMIN
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  INCOMPLETE
+  UNDER_REVIEW
+  VERIFIED
+  APPROVED
+  ARCHIVED
+  REJECTED
+  COMPLETED
+}
+
+enum CompletenessStatus {
+  COMPLETE
+  INCOMPLETE
+}
+
+enum DocumentType {
+  BACCALAUREATE_TRANSCRIPT
+  UNIVERSITY_TRANSCRIPTS
+  GRADUATION_CERTIFICATE
+  ACADEMIC_LEAVE
+  FAILED_YEAR_TRANSCRIPT
+  DEBT_CLEARANCE
+  INTERRUPTION_CERTIFICATE
+  TRANSFER_FORM
+  PREVIOUS_UNIVERSITY_DOCUMENTS
+  OTHER
+}
+
+enum AuditAction {
+  LOGIN
+  FAILED_LOGIN
+  LOGOUT
+  STUDENT_REGISTRATION
+  INSTITUTION_REGISTRATION
+  FILE_SUBMISSION
+  FILE_APPROVAL
+  FILE_REJECTION
+  FILE_INCOMPLETE
+  FILE_ARCHIVED
+  VERIFICATION_GENERATED
+  PAYMENT_CREATED
+  PAYMENT_PAID
+  PDF_REPORT_GENERATED
+  BLOCKCHAIN_CERTIFICATE_REGISTERED
+  BLOCKCHAIN_CERTIFICATE_REVOKED
+  INSTITUTION_SEARCH
+  ACCOUNT_STATUS_CHANGED
+  ROLE_CHANGED
+  DOCUMENT_REQUIREMENT_UPDATED
+  PROFILE_UPDATED
+  DOCUMENT_UPLOADED
+}
+
+enum PaymentProvider {
+  MOCK
+  EDAHABIA
+  CIB
+  GIE_MONETIQUE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  PENDING_PAYMENT
+}
+
+enum SubscriptionTier {
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum DocumentValidationStatus {
+  PENDING
+  VALID
+  INVALID
+}
+
+enum DigitalSignatureStatus {
+  PENDING
+  SEALED_PLACEHOLDER
+  SIGNED
+  FAILED
+  VERIFIED
+}
+
+model User {
+  id               String               @id @default(cuid())
+  fullName         String
+  email            String               @unique
+  passwordHash     String
+  role             UserRole
+  phone            String?
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  studentProfile   StudentProfile?
+  institution      InstitutionProfile?
+  reviewedFiles    DocumentSubmission[] @relation("ReviewedBy")
+  generatedRecords VerificationRecord[] @relation("GeneratedBy")
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  payments         Payment[]
+  reportsGenerated VerificationReport[] @relation("ReportGeneratedBy")
+
+  @@index([role])
+  @@index([isActive])
+}
+
+model StudentProfile {
+  id                        String               @id @default(cuid())
+  userId                    String               @unique
+  user                      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateOfBirth               DateTime?
+  nationalId                String?              @unique
+  nin                       String?              @unique
+  studentRegistrationNumber String?              @unique
+  universityId              String?
+  universityRecord          University?          @relation(fields: [universityId], references: [id])
+  university                String?
+  faculty                   String?
+  department                String?
+  specialty                 String?
+  graduationYear            Int?
+  degreeType                String?
+  certificateNumber         String?              @unique
+  photoUrl                  String?
+  submissions               DocumentSubmission[]
+  verificationRecords       VerificationRecord[]
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+
+  @@index([nationalId])
+  @@index([nin])
+  @@index([studentRegistrationNumber])
+  @@index([universityId])
+}
+
+model InstitutionProfile {
+  id                    String                 @id @default(cuid())
+  userId                String                 @unique
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institutionName       String
+  institutionType       String
+  licenseNumber         String?
+  taxId                 String?
+  address               String?
+  contactPerson         String?
+  subscriptionStartDate DateTime
+  subscriptionEndDate   DateTime
+  subscriptionStatus    SubscriptionStatus     @default(ACTIVE)
+  subscriptionTier      SubscriptionTier       @default(BASIC)
+  monthlySearchLimit    Int                    @default(25)
+  searchesUsedThisMonth Int                    @default(0)
+  isSubscriptionActive  Boolean                @default(true)
+  searchLogs            InstitutionSearchLog[]
+  verificationReports   VerificationReport[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  @@index([isSubscriptionActive])
+  @@index([subscriptionStatus])
+  @@index([subscriptionTier])
+}
+
+model DocumentSubmission {
+  id                  String               @id @default(cuid())
+  studentId           String
+  student             StudentProfile       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status              SubmissionStatus     @default(DRAFT)
+  completenessStatus  CompletenessStatus   @default(INCOMPLETE)
+  receiptNumber       String?              @unique
+  receiptQrCode       String?
+  adminNotes          String?
+  paymentId           String?              @unique
+  payment             Payment?             @relation(fields: [paymentId], references: [id])
+  submittedAt         DateTime?
+  reviewedAt          DateTime?
+  reviewedById        String?
+  reviewedBy          User?                @relation("ReviewedBy", fields: [reviewedById], references: [id])
+  archivedAt          DateTime?
+  documents           StudentDocument[]
+  missingDocuments    MissingDocument[]
+  verificationRecords VerificationRecord[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([submittedAt])
+}
+
+model StudentDocument {
+  id               String                   @id @default(cuid())
+  submissionId     String
+  submission       DocumentSubmission       @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  documentType     DocumentType
+  fileName         String
+  filePath         String
+  storagePath      String?
+  mimeType         String
+  size             Int
+  sha256Hash       String?
+  validationStatus DocumentValidationStatus @default(PENDING)
+  uploadedAt       DateTime                 @default(now())
+
+  @@index([submissionId])
+  @@index([documentType])
+}
+
+model University {
+  id        String           @id @default(cuid())
+  name      String
+  code      String           @unique
+  city      String?
+  address   String?
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  students  StudentProfile[]
+}
+
+model MissingDocument {
+  id                    String              @id @default(cuid())
+  submissionId          String
+  submission            DocumentSubmission  @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  documentRequirementId String
+  documentRequirement   DocumentRequirement @relation(fields: [documentRequirementId], references: [id], onDelete: Cascade)
+  note                  String?
+  createdAt             DateTime            @default(now())
+
+  @@unique([submissionId, documentRequirementId])
+  @@index([submissionId])
+}
+
+model Payment {
+  id                   String              @id @default(cuid())
+  userId               String
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissionId         String?
+  provider             PaymentProvider     @default(MOCK)
+  amount               Decimal             @db.Decimal(10, 2)
+  currency             String              @default("DZD")
+  status               PaymentStatus       @default(PENDING)
+  transactionReference String              @unique
+  paidAt               DateTime?
+  createdAt            DateTime            @default(now())
+  submission           DocumentSubmission?
+
+  @@index([userId])
+  @@index([submissionId])
+  @@index([status])
+}
+
+model VerificationRecord {
+  id                   String                 @id @default(cuid())
+  studentId            String
+  student              StudentProfile         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  submissionId         String
+  submission           DocumentSubmission     @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  verificationCode     String                 @unique
+  verificationCodeHash String?
+  documentHash         String?
+  studentHash          String?
+  degreeHash           String?
+  blockchainTxHash     String?
+  blockchainNetwork    String?
+  contractAddress      String?
+  qrCodeUrl            String?
+  isValid              Boolean                @default(true)
+  generatedAt          DateTime               @default(now())
+  revokedAt            DateTime?
+  generatedById        String?
+  generatedBy          User?                  @relation("GeneratedBy", fields: [generatedById], references: [id])
+  InstitutionSearchLog InstitutionSearchLog[]
+  VerificationReport   VerificationReport[]
+
+  @@index([studentId])
+  @@index([submissionId])
+  @@index([verificationCodeHash])
+  @@index([blockchainTxHash])
+}
+
+model InstitutionSearchLog {
+  id                   String              @id @default(cuid())
+  institutionId        String
+  institution          InstitutionProfile  @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  searchQuery          String
+  queryType            String?
+  queryValueMasked     String?
+  resultFound          Boolean
+  verificationRecordId String?
+  verificationRecord   VerificationRecord? @relation(fields: [verificationRecordId], references: [id])
+  ipAddress            String?
+  searchedAt           DateTime            @default(now())
+
+  @@index([institutionId])
+  @@index([searchedAt])
+}
+
+model VerificationReport {
+  id                     String                 @id @default(cuid())
+  institutionId          String
+  institution            InstitutionProfile     @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  verificationRecordId   String
+  verificationRecord     VerificationRecord     @relation(fields: [verificationRecordId], references: [id], onDelete: Cascade)
+  reportNumber           String                 @unique
+  pdfPath                String?
+  pdfHash                String?
+  digitalSignatureStatus DigitalSignatureStatus @default(SEALED_PLACEHOLDER)
+  generatedAt            DateTime               @default(now())
+  generatedById          String?
+  generatedBy            User?                  @relation("ReportGeneratedBy", fields: [generatedById], references: [id])
+
+  @@index([institutionId])
+  @@index([verificationRecordId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  userId     String?
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     AuditAction
+  entityType String
+  entityId   String?
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model DocumentRequirement {
+  id               String            @id @default(cuid())
+  documentType     DocumentType      @unique
+  name             String?
+  code             String?           @unique
+  label            String
+  description      String?
+  isRequired       Boolean           @default(false)
+  isConditional    Boolean           @default(false)
+  conditionKey     String?
+  isActive         Boolean           @default(true)
+  appliesWhen      String?
+  sortOrder        Int               @default(0)
+  missingDocuments MissingDocument[]
+  updatedAt        DateTime          @updatedAt
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
