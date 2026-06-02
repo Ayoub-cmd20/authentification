@@ -239,9 +239,9 @@ export const BlockchainProofCard = ({
     </div>
     <dl className="mt-4 grid gap-3 text-sm">
       {[
-        ["Network", network ?? "Not configured"],
-        ["Transaction hash", txHash ?? "Not registered on-chain"],
-        ["Contract address", contractAddress ?? "Not configured"]
+        ["Network", network || "Not configured"],
+        ["Transaction hash", txHash || "Not registered on-chain"],
+        ["Contract address", contractAddress || "Not configured"]
       ].map(([label, value]) => (
         <div key={label}>
           <dt className="text-xs font-semibold uppercase text-muted">{label}</dt>

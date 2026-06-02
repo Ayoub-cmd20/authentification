@@ -72,10 +72,10 @@ export const PublicVerificationPage = () => {
                 ["Graduation year", result.graduationYear],
                 ["University", result.university],
                 ["Verification date", new Date(result.verificationDate).toLocaleString()],
-                ["Blockchain network", result.blockchainNetwork ?? "Not configured"],
+                ["Blockchain network", result.blockchainNetwork || "Not configured"],
                 ["Blockchain result", result.blockchainResult],
-                ["Transaction hash", result.blockchainTxHash ?? "Not available"],
-                ["Contract address", result.contractAddress ?? "Not available"]
+                ["Transaction hash", result.blockchainTxHash || "Not available"],
+                ["Contract address", result.contractAddress || "Not available"]
               ].map(([label, value]) => (
                 <div key={label} className="rounded-md border border-slate-200 bg-slate-50 p-3">
                   <dt className="text-xs font-semibold uppercase text-slate-500">{label}</dt>

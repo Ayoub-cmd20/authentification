@@ -10,6 +10,7 @@ import { SearchPage } from "./pages/institution/SearchPage";
 import { MinistryAuditLogsPage } from "./pages/ministry/MinistryAuditLogsPage";
 import { MinistryOverview } from "./pages/ministry/MinistryOverview";
 import { LandingPage } from "./pages/public/LandingPage";
+import { ForgotPasswordPage } from "./pages/public/ForgotPasswordPage";
 import { LoginPage } from "./pages/public/LoginPage";
 import { PublicVerificationPage } from "./pages/public/PublicVerificationPage";
 import { RegisterPage } from "./pages/public/RegisterPage";
@@ -27,6 +28,7 @@ export const App = () => (
     <Route element={<PublicLayout />}>
       <Route index element={<LandingPage />} />
       <Route path="login" element={<LoginPage />} />
+      <Route path="forgot-password" element={<ForgotPasswordPage />} />
       <Route path="register/student" element={<RegisterPage type="student" />} />
       <Route path="register/institution" element={<RegisterPage type="institution" />} />
       <Route path="verify" element={<PublicVerificationPage />} />
