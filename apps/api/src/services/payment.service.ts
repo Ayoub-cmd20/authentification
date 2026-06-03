@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { AuditAction, PaymentProvider, PaymentStatus } from "@prisma/client";
+import { AuditAction, PaymentProvider, PaymentStatus, type PaymentProvider as PaymentProviderValue } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 import { audit } from "./audit.service.js";
 import { AppError, notFound } from "../utils/errors.js";
@@ -7,7 +7,7 @@ import { AppError, notFound } from "../utils/errors.js";
 export const createMockPaymentIntent = async (input: {
   userId: string;
   submissionId?: string;
-  provider?: PaymentProvider;
+  provider?: PaymentProviderValue;
   amount?: number;
 }) => {
   const provider = input.provider ?? PaymentProvider.MOCK;

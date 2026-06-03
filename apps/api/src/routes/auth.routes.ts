@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { Router } from "express";
-import { AuditAction, UserRole } from "@prisma/client";
+import { AuditAction, UserRole, isUserRole } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 import { signToken, requireAuth } from "../middleware/auth.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -12,7 +12,7 @@ import type { AuthRequest } from "../types.js";
 
 export const authRouter = Router();
 
-const publicUser = (user: { id: string; fullName: string; email: string; role: UserRole; phone: string | null; isActive: boolean }) => ({
+const publicUser = (user: { id: string; fullName: string; email: string; role: string; phone: string | null; isActive: boolean }) => ({
   id: user.id,
   fullName: user.fullName,
   email: user.email,
@@ -43,7 +43,7 @@ authRouter.post(
       }
     });
     await audit({ userId: user.id, action: AuditAction.STUDENT_REGISTRATION, entityType: "User", entityId: user.id });
-    res.status(201).json({ user: publicUser(user), token: signToken({ id: user.id, role: user.role }) });
+    res.status(201).json({ user: publicUser(user), token: signToken({ id: user.id, role: UserRole.STUDENT }) });
   })
 );
 
@@ -78,7 +78,7 @@ authRouter.post(
       }
     });
     await audit({ userId: user.id, action: AuditAction.INSTITUTION_REGISTRATION, entityType: "User", entityId: user.id });
-    res.status(201).json({ user: publicUser(user), token: signToken({ id: user.id, role: user.role }) });
+    res.status(201).json({ user: publicUser(user), token: signToken({ id: user.id, role: UserRole.INSTITUTION }) });
   })
 );
 
@@ -93,6 +93,7 @@ authRouter.post(
       throw new AppError(401, "Invalid email or password");
     }
     if (!user.isActive) throw new AppError(403, "Account is inactive");
+    if (!isUserRole(user.role)) throw new AppError(403, "Invalid user role");
 
     await audit({ userId: user.id, action: AuditAction.LOGIN, entityType: "User", entityId: user.id });
     res.json({ user: publicUser(user), token: signToken({ id: user.id, role: user.role }) });

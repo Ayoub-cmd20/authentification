@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AuditAction, DocumentType, SubscriptionStatus, SubscriptionTier, UserRole } from "@prisma/client";
+import { AuditAction, DocumentType, SubscriptionStatus, SubscriptionTier, UserRole } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { audit } from "../services/audit.service.js";
@@ -9,6 +9,14 @@ import { AppError } from "../utils/errors.js";
 export const superAdminRouter = Router();
 
 superAdminRouter.use(requireAuth, requireRole(UserRole.SUPER_ADMIN));
+
+const parseSettingValue = (value: string) => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
 
 superAdminRouter.get(
   "/stats",
@@ -159,6 +167,7 @@ superAdminRouter.post(
   "/document-requirements",
   asyncHandler(async (req, res) => {
     const documentType = req.body.documentType as DocumentType;
+    if (!Object.values(DocumentType).includes(documentType)) throw new AppError(400, "Invalid document type");
     const requirement = await prisma.documentRequirement.create({
       data: {
         documentType,
@@ -180,7 +189,8 @@ superAdminRouter.post(
 superAdminRouter.get(
   "/settings",
   asyncHandler(async (_req, res) => {
-    res.json(await prisma.systemSetting.findMany({ orderBy: { key: "asc" } }));
+    const settings = await prisma.systemSetting.findMany({ orderBy: { key: "asc" } });
+    res.json(settings.map((setting) => ({ ...setting, value: parseSettingValue(setting.value) })));
   })
 );
 
@@ -189,9 +199,9 @@ superAdminRouter.patch(
   asyncHandler(async (req, res) => {
     const setting = await prisma.systemSetting.upsert({
       where: { key: req.params.key },
-      update: { value: req.body.value },
-      create: { key: req.params.key, value: req.body.value }
+      update: { value: JSON.stringify(req.body.value) },
+      create: { key: req.params.key, value: JSON.stringify(req.body.value) }
     });
-    res.json(setting);
+    res.json({ ...setting, value: parseSettingValue(setting.value) });
   })
 );

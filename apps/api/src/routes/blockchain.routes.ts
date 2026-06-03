@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AuditAction, UserRole } from "@prisma/client";
+import { AuditAction, UserRole } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { hashWithSecret } from "../services/hash.service.js";

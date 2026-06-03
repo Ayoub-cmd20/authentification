@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "./constants/prismaEnums.js";
 import type { Request } from "express";
 
 export type AuthUser = {

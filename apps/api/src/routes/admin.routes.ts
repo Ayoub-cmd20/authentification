@@ -1,6 +1,6 @@
 import path from "node:path";
 import { Router } from "express";
-import { AuditAction, SubmissionStatus, UserRole } from "@prisma/client";
+import { AuditAction, SubmissionStatus, UserRole, type SubmissionStatus as SubmissionStatusValue } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { audit } from "../services/audit.service.js";
@@ -46,7 +46,7 @@ adminRouter.get(
 adminRouter.get(
   "/submissions",
   asyncHandler(async (req, res) => {
-    const status = req.query.status as SubmissionStatus | undefined;
+    const status = req.query.status as SubmissionStatusValue | undefined;
     const submissions = await prisma.documentSubmission.findMany({
       where: status ? { status } : {},
       include: submissionInclude,
@@ -68,7 +68,7 @@ adminRouter.get(
 adminRouter.patch(
   "/submissions/:id/status",
   asyncHandler(async (req: AuthRequest, res) => {
-    const status = req.body.status as SubmissionStatus;
+    const status = req.body.status as SubmissionStatusValue;
     if (!Object.values(SubmissionStatus).includes(status)) throw new AppError(400, "Invalid status");
     const submission = await prisma.documentSubmission.update({
       where: { id: req.params.id },

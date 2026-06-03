@@ -1,4 +1,5 @@
-import { CompletenessStatus, DocumentType, DocumentValidationStatus, type StudentDocument } from "@prisma/client";
+import { type StudentDocument } from "@prisma/client";
+import { CompletenessStatus, DocumentType, DocumentValidationStatus } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 
 const fallbackRequired = [
@@ -16,8 +17,8 @@ export const evaluateSubmissionCompleteness = async (
     orderBy: { sortOrder: "asc" }
   });
   const requiredTypes = requirements.length ? requirements.map((item) => item.documentType) : fallbackRequired;
-  const uploaded = new Set<DocumentType>();
-  const duplicateTypes = new Set<DocumentType>();
+  const uploaded = new Set<string>();
+  const duplicateTypes = new Set<string>();
 
   for (const document of documents) {
     if (uploaded.has(document.documentType)) duplicateTypes.add(document.documentType);

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import type { SignOptions } from "jsonwebtoken";
 import type { NextFunction, Response } from "express";
-import type { UserRole } from "@prisma/client";
+import { isUserRole, type UserRole } from "../constants/prismaEnums.js";
 import { env } from "../config/env.js";
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/errors.js";
@@ -28,8 +28,11 @@ export const requireAuth = async (req: AuthRequest, _res: Response, next: NextFu
     if (!user || !user.isActive) {
       throw new AppError(401, "Account is inactive or no longer exists");
     }
+    if (!isUserRole(user.role)) {
+      throw new AppError(401, "Invalid user role");
+    }
 
-    req.user = user;
+    req.user = { ...user, role: user.role };
     next();
   } catch (error) {
     next(error instanceof AppError ? error : new AppError(401, "Invalid or expired token"));

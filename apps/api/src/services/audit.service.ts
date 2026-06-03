@@ -1,5 +1,4 @@
-import type { AuditAction } from "@prisma/client";
-import type { Prisma } from "@prisma/client";
+import type { AuditAction } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 
 export const audit = async (input: {
@@ -15,7 +14,7 @@ export const audit = async (input: {
       action: input.action,
       entityType: input.entityType,
       entityId: input.entityId,
-      details: (input.details ?? {}) as Prisma.InputJsonValue
+      details: JSON.stringify(input.details ?? {})
     }
   });
 };

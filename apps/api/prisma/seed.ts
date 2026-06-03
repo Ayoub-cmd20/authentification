@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import PDFDocument from "pdfkit";
 import bcrypt from "bcryptjs";
-import { CompletenessStatus, DocumentType, PaymentStatus, SubmissionStatus, SubscriptionTier, UserRole } from "@prisma/client";
+import { CompletenessStatus, DocumentType, PaymentStatus, SubmissionStatus, SubscriptionTier, UserRole } from "../src/constants/prismaEnums.js";
 import { prisma } from "../src/config/prisma.js";
 import { createVerificationRecord } from "../src/services/verification.service.js";
 
@@ -241,10 +241,12 @@ const main = async () => {
     });
   }
 
+  const platformBrand = JSON.stringify({ name: "Tawtheeq.dz", arabicName: "منصة توثيق" });
+
   await prisma.systemSetting.upsert({
     where: { key: "platform.brand" },
-    update: { value: { name: "Tawtheeq.dz", arabicName: "منصة توثيق" } },
-    create: { key: "platform.brand", value: { name: "Tawtheeq.dz", arabicName: "منصة توثيق" } }
+    update: { value: platformBrand },
+    create: { key: "platform.brand", value: platformBrand }
   });
 
   console.log(`Seeded users. Super admin: ${superAdmin.email}. Ministry admin: ${ministryAdmin.email}`);

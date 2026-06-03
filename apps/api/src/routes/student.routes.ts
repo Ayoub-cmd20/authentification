@@ -1,7 +1,7 @@
 import path from "node:path";
 import QRCode from "qrcode";
 import { Router } from "express";
-import { AuditAction, CompletenessStatus, DocumentType, DocumentValidationStatus, SubmissionStatus, UserRole } from "@prisma/client";
+import { AuditAction, CompletenessStatus, DocumentType, DocumentValidationStatus, SubmissionStatus, UserRole, type DocumentType as DocumentTypeValue } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 import { env } from "../config/env.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
@@ -129,7 +129,7 @@ studentRouter.post(
     const submission = await prisma.documentSubmission.findFirst({ where: { id: req.params.id, studentId: profile.id } });
     if (!submission) throw notFound("Submission");
     if (!req.file) throw new AppError(400, "PDF file is required");
-    const documentType = req.body.documentType as DocumentType;
+    const documentType = req.body.documentType as DocumentTypeValue;
     if (!Object.values(DocumentType).includes(documentType)) throw new AppError(400, "Invalid document type");
 
     const sha256Hash = await sha256File(req.file.path);

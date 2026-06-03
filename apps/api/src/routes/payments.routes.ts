@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { PaymentProvider, UserRole } from "@prisma/client";
+import { PaymentProvider, UserRole, type PaymentProvider as PaymentProviderValue } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { createMockPaymentIntent, markMockPaymentPaid } from "../services/payment.service.js";
@@ -23,7 +23,7 @@ paymentsRouter.post(
       if (!submission && req.user!.role !== UserRole.SUPER_ADMIN) throw notFound("Submission");
     }
 
-    const provider = (req.body.provider as PaymentProvider | undefined) ?? PaymentProvider.MOCK;
+    const provider = (req.body.provider as PaymentProviderValue | undefined) ?? PaymentProvider.MOCK;
     if (!Object.values(PaymentProvider).includes(provider)) throw new AppError(400, "Unsupported payment provider");
     const payment = await createMockPaymentIntent({
       userId: req.user!.id,

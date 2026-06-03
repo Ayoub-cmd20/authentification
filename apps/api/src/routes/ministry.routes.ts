@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { SubmissionStatus, UserRole } from "@prisma/client";
+import { SubmissionStatus, UserRole } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { asyncHandler } from "../utils/asyncHandler.js";

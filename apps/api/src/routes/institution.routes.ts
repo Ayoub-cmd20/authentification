@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
-import { AuditAction, SubmissionStatus, SubscriptionStatus, SubscriptionTier, UserRole } from "@prisma/client";
+import { AuditAction, SubmissionStatus, SubscriptionStatus, SubscriptionTier, UserRole } from "../constants/prismaEnums.js";
 import { prisma } from "../config/prisma.js";
 import { env } from "../config/env.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
@@ -67,11 +67,11 @@ institutionRouter.get(
         submission: { status: { in: [SubmissionStatus.VERIFIED, SubmissionStatus.COMPLETED, SubmissionStatus.ARCHIVED] } },
         student: {
           OR: [
-            { studentRegistrationNumber: { contains: query, mode: "insensitive" } },
-            { nationalId: { contains: query, mode: "insensitive" } },
-            { nin: { contains: query, mode: "insensitive" } },
-            { certificateNumber: { contains: query, mode: "insensitive" } },
-            { user: { fullName: { contains: query, mode: "insensitive" } } }
+            { studentRegistrationNumber: { contains: query } },
+            { nationalId: { contains: query } },
+            { nin: { contains: query } },
+            { certificateNumber: { contains: query } },
+            { user: { fullName: { contains: query } } }
           ]
         }
       },
@@ -81,7 +81,7 @@ institutionRouter.get(
     });
 
     const certificateMatches = await prisma.verificationRecord.findMany({
-      where: { verificationCode: { contains: query, mode: "insensitive" }, isValid: true },
+      where: { verificationCode: { contains: query }, isValid: true },
       include: { student: { include: { user: true } }, submission: true },
       take: 10
     });
