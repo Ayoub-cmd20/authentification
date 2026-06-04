@@ -3,8 +3,112 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  UNIVERSITY_ADMIN
+  INSTITUTION
+  MINISTRY_ADMIN
+  SUPER_ADMIN
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  INCOMPLETE
+  UNDER_REVIEW
+  VERIFIED
+  APPROVED
+  ARCHIVED
+  REJECTED
+  COMPLETED
+}
+
+enum CompletenessStatus {
+  COMPLETE
+  INCOMPLETE
+}
+
+enum DocumentType {
+  BACCALAUREATE_TRANSCRIPT
+  UNIVERSITY_TRANSCRIPTS
+  GRADUATION_CERTIFICATE
+  ACADEMIC_LEAVE
+  FAILED_YEAR_TRANSCRIPT
+  DEBT_CLEARANCE
+  INTERRUPTION_CERTIFICATE
+  TRANSFER_FORM
+  PREVIOUS_UNIVERSITY_DOCUMENTS
+  OTHER
+}
+
+enum AuditAction {
+  LOGIN
+  FAILED_LOGIN
+  LOGOUT
+  STUDENT_REGISTRATION
+  INSTITUTION_REGISTRATION
+  FILE_SUBMISSION
+  FILE_APPROVAL
+  FILE_REJECTION
+  FILE_INCOMPLETE
+  FILE_ARCHIVED
+  VERIFICATION_GENERATED
+  PAYMENT_CREATED
+  PAYMENT_PAID
+  PDF_REPORT_GENERATED
+  BLOCKCHAIN_CERTIFICATE_REGISTERED
+  BLOCKCHAIN_CERTIFICATE_REVOKED
+  INSTITUTION_SEARCH
+  ACCOUNT_STATUS_CHANGED
+  ROLE_CHANGED
+  DOCUMENT_REQUIREMENT_UPDATED
+  PROFILE_UPDATED
+  DOCUMENT_UPLOADED
+}
+
+enum PaymentProvider {
+  MOCK
+  EDAHABIA
+  CIB
+  GIE_MONETIQUE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  PENDING_PAYMENT
+}
+
+enum SubscriptionTier {
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum DocumentValidationStatus {
+  PENDING
+  VALID
+  INVALID
+}
+
+enum DigitalSignatureStatus {
+  PENDING
+  SEALED_PLACEHOLDER
+  SIGNED
+  FAILED
+  VERIFIED
 }
 
 model User {
@@ -12,8 +116,7 @@ model User {
   fullName         String
   email            String               @unique
   passwordHash     String
-  /// SQLite stores former Prisma enum values as strings. Validate with UserRole in app constants.
-  role             String
+  role             UserRole
   phone            String?
   isActive         Boolean              @default(true)
   createdAt        DateTime             @default(now())
@@ -72,10 +175,8 @@ model InstitutionProfile {
   contactPerson         String?
   subscriptionStartDate DateTime
   subscriptionEndDate   DateTime
-  /// Former enum; validate with SubscriptionStatus in app constants.
-  subscriptionStatus    String                 @default("ACTIVE")
-  /// Former enum; validate with SubscriptionTier in app constants.
-  subscriptionTier      String                 @default("BASIC")
+  subscriptionStatus    SubscriptionStatus     @default(ACTIVE)
+  subscriptionTier      SubscriptionTier       @default(BASIC)
   monthlySearchLimit    Int                    @default(25)
   searchesUsedThisMonth Int                    @default(0)
   isSubscriptionActive  Boolean                @default(true)
@@ -93,10 +194,8 @@ model DocumentSubmission {
   id                  String               @id @default(cuid())
   studentId           String
   student             StudentProfile       @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  /// Former enum; validate with SubmissionStatus in app constants.
-  status              String               @default("DRAFT")
-  /// Former enum; validate with CompletenessStatus in app constants.
-  completenessStatus  String               @default("INCOMPLETE")
+  status              SubmissionStatus     @default(DRAFT)
+  completenessStatus  CompletenessStatus   @default(INCOMPLETE)
   receiptNumber       String?              @unique
   receiptQrCode       String?
   adminNotes          String?
@@ -122,16 +221,14 @@ model StudentDocument {
   id               String                   @id @default(cuid())
   submissionId     String
   submission       DocumentSubmission       @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  /// Former enum; validate with DocumentType in app constants.
-  documentType     String
+  documentType     DocumentType
   fileName         String
   filePath         String
   storagePath      String?
   mimeType         String
   size             Int
   sha256Hash       String?
-  /// Former enum; validate with DocumentValidationStatus in app constants.
-  validationStatus String                   @default("PENDING")
+  validationStatus DocumentValidationStatus @default(PENDING)
   uploadedAt       DateTime                 @default(now())
 
   @@index([submissionId])
@@ -167,12 +264,10 @@ model Payment {
   userId               String
   user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   submissionId         String?
-  /// Former enum; validate with PaymentProvider in app constants.
-  provider             String              @default("MOCK")
-  amount               Decimal
+  provider             PaymentProvider     @default(MOCK)
+  amount               Decimal             @db.Decimal(10, 2)
   currency             String              @default("DZD")
-  /// Former enum; validate with PaymentStatus in app constants.
-  status               String              @default("PENDING")
+  status               PaymentStatus       @default(PENDING)
   transactionReference String              @unique
   paidAt               DateTime?
   createdAt            DateTime            @default(now())
@@ -238,8 +333,7 @@ model VerificationReport {
   reportNumber           String                 @unique
   pdfPath                String?
   pdfHash                String?
-  /// Former enum; validate with DigitalSignatureStatus in app constants.
-  digitalSignatureStatus String                 @default("SEALED_PLACEHOLDER")
+  digitalSignatureStatus DigitalSignatureStatus @default(SEALED_PLACEHOLDER)
   generatedAt            DateTime               @default(now())
   generatedById          String?
   generatedBy            User?                  @relation("ReportGeneratedBy", fields: [generatedById], references: [id])
@@ -265,12 +359,10 @@ model AuditLog {
   id         String      @id @default(cuid())
   userId     String?
   user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-  /// Former enum; validate with AuditAction in app constants.
-  action     String
+  action     AuditAction
   entityType String
   entityId   String?
-  /// JSON serialized string for SQLite portability.
-  details    String?
+  details    Json?
   ipAddress  String?
   userAgent  String?
   createdAt  DateTime    @default(now())
@@ -282,8 +374,7 @@ model AuditLog {
 
 model DocumentRequirement {
   id               String            @id @default(cuid())
-  /// Former enum; validate with DocumentType in app constants.
-  documentType     String            @unique
+  documentType     DocumentType      @unique
   name             String?
   code             String?           @unique
   label            String
@@ -301,7 +392,6 @@ model DocumentRequirement {
 model SystemSetting {
   id        String   @id @default(cuid())
   key       String   @unique
-  /// JSON serialized string for SQLite portability.
-  value     String
+  value     Json
   updatedAt DateTime @updatedAt
 }

@@ -2,7 +2,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
-import { env } from "./config/env.js";
+import { env, webOrigins } from "./config/env.js";
 import { prisma } from "./config/prisma.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { apiRouter } from "./routes/index.js";
@@ -10,7 +10,7 @@ import { apiRouter } from "./routes/index.js";
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: env.WEB_APP_URL, credentials: true }));
+app.use(cors({ origin: webOrigins, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
 

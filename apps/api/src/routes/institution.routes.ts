@@ -67,11 +67,11 @@ institutionRouter.get(
         submission: { status: { in: [SubmissionStatus.VERIFIED, SubmissionStatus.COMPLETED, SubmissionStatus.ARCHIVED] } },
         student: {
           OR: [
-            { studentRegistrationNumber: { contains: query } },
-            { nationalId: { contains: query } },
-            { nin: { contains: query } },
-            { certificateNumber: { contains: query } },
-            { user: { fullName: { contains: query } } }
+            { studentRegistrationNumber: { contains: query, mode: "insensitive" } },
+            { nationalId: { contains: query, mode: "insensitive" } },
+            { nin: { contains: query, mode: "insensitive" } },
+            { certificateNumber: { contains: query, mode: "insensitive" } },
+            { user: { fullName: { contains: query, mode: "insensitive" } } }
           ]
         }
       },
@@ -81,7 +81,7 @@ institutionRouter.get(
     });
 
     const certificateMatches = await prisma.verificationRecord.findMany({
-      where: { verificationCode: { contains: query }, isValid: true },
+      where: { verificationCode: { contains: query, mode: "insensitive" }, isValid: true },
       include: { student: { include: { user: true } }, submission: true },
       take: 10
     });

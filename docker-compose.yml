@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: tawtheeq-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: university_auth_platform
+    ports:
+      - "5432:5432"
+    volumes:
+      - tawtheeq-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  tawtheeq-postgres-data:

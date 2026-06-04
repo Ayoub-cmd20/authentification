@@ -241,7 +241,7 @@ const main = async () => {
     });
   }
 
-  const platformBrand = JSON.stringify({ name: "Tawtheeq.dz", arabicName: "منصة توثيق" });
+  const platformBrand = { name: "Tawtheeq.dz", arabicName: "منصة توثيق" };
 
   await prisma.systemSetting.upsert({
     where: { key: "platform.brand" },

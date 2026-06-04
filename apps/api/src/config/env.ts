@@ -9,6 +9,7 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default("7d"),
   PORT: z.coerce.number().default(4000),
   WEB_APP_URL: z.string().url().default("http://localhost:5173"),
+  WEB_APP_URLS: z.string().optional(),
   UPLOAD_DIR: z.string().default("apps/api/uploads"),
   MAX_FILE_SIZE_MB: z.coerce.number().default(10),
   HASH_SECRET: z.string().min(32, "HASH_SECRET must be at least 32 characters"),
@@ -24,3 +25,8 @@ const envSchema = z.object({
 });
 
 export const env = envSchema.parse(process.env);
+
+export const webOrigins = (env.WEB_APP_URLS ?? env.WEB_APP_URL)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);

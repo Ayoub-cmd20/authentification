@@ -10,14 +10,6 @@ export const superAdminRouter = Router();
 
 superAdminRouter.use(requireAuth, requireRole(UserRole.SUPER_ADMIN));
 
-const parseSettingValue = (value: string) => {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return value;
-  }
-};
-
 superAdminRouter.get(
   "/stats",
   asyncHandler(async (_req, res) => {
@@ -189,8 +181,7 @@ superAdminRouter.post(
 superAdminRouter.get(
   "/settings",
   asyncHandler(async (_req, res) => {
-    const settings = await prisma.systemSetting.findMany({ orderBy: { key: "asc" } });
-    res.json(settings.map((setting) => ({ ...setting, value: parseSettingValue(setting.value) })));
+    res.json(await prisma.systemSetting.findMany({ orderBy: { key: "asc" } }));
   })
 );
 
@@ -199,9 +190,9 @@ superAdminRouter.patch(
   asyncHandler(async (req, res) => {
     const setting = await prisma.systemSetting.upsert({
       where: { key: req.params.key },
-      update: { value: JSON.stringify(req.body.value) },
-      create: { key: req.params.key, value: JSON.stringify(req.body.value) }
+      update: { value: req.body.value },
+      create: { key: req.params.key, value: req.body.value }
     });
-    res.json({ ...setting, value: parseSettingValue(setting.value) });
+    res.json(setting);
   })
 );
