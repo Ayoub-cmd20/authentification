@@ -19,7 +19,9 @@
     "hardhat:node": "hardhat node",
     "hardhat:deploy:local": "hardhat run scripts/deploy.cjs --network localhost",
     "hardhat:deploy:sepolia": "hardhat run scripts/deploy.cjs --network sepolia",
-    "hardhat:deploy:amoy": "hardhat run scripts/deploy.cjs --network amoy"
+    "hardhat:deploy:amoy": "hardhat run scripts/deploy.cjs --network amoy",
+    "prisma:deploy": "prisma migrate deploy --schema apps/api/prisma/schema.prisma",
+    "start:api": "node apps/api/dist/src/server.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -51,6 +53,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "pdfkit": "^0.15.1",
+    "prisma": "^5.22.0",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -70,7 +73,6 @@
     "hardhat": "^3.7.0",
     "mocha": "^11.3.0",
     "postcss": "^8.4.49",
-    "prisma": "^5.22.0",
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
