@@ -25,7 +25,7 @@ export const Logo: React.FC<LogoProps> = ({ className = "", size = "md", inverte
           className={cn("block font-extrabold leading-tight tracking-tight", titleSize)}
           style={{ color: inverted ? "#fff" : "#003366" }}
         >
-          tawthiq.dz
+          tawtheeQ.dz
         </span>
         <span
           className={cn("block leading-tight", subSize)}
