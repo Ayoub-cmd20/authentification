@@ -6,7 +6,7 @@ import { CompletenessStatus, DocumentType, PaymentStatus, SubmissionStatus, Subs
 import { prisma } from "../src/config/prisma.js";
 import { createVerificationRecord } from "../src/services/verification.service.js";
 
-const password = async (envName: string) => bcrypt.hash(process.env[envName] ?? "ChangeMe123!", 12);
+const password = async (envName: string) => bcrypt.hash(process.env[envName] ?? "Tawtheeq2026!Secure", 12);
 
 const ensureSeedPdf = async (fileName: string, title: string) => {
   const uploadDir = path.resolve(process.env.UPLOAD_DIR ?? "apps/api/uploads");
@@ -29,11 +29,11 @@ const ensureSeedPdf = async (fileName: string, title: string) => {
 
 const main = async () => {
   const superAdmin = await prisma.user.upsert({
-    where: { email: "super.admin@uap.test" },
+    where: { email: "super.admin@tawtheeq.example" },
     update: {},
     create: {
       fullName: "Platform Super Admin",
-      email: "super.admin@uap.test",
+      email: "super.admin@tawtheeq.example",
       passwordHash: await password("SEED_SUPER_ADMIN_PASSWORD"),
       role: UserRole.SUPER_ADMIN,
       phone: "+213555000001"
@@ -41,11 +41,11 @@ const main = async () => {
   });
 
   const universityAdmin = await prisma.user.upsert({
-    where: { email: "university.admin@uap.test" },
+    where: { email: "university.admin@tawtheeq.example" },
     update: {},
     create: {
       fullName: "University Registrar Admin",
-      email: "university.admin@uap.test",
+      email: "university.admin@tawtheeq.example",
       passwordHash: await password("SEED_UNIVERSITY_ADMIN_PASSWORD"),
       role: UserRole.UNIVERSITY_ADMIN,
       phone: "+213555000002"
@@ -53,11 +53,11 @@ const main = async () => {
   });
 
   const ministryAdmin = await prisma.user.upsert({
-    where: { email: "ministry.admin@tawtheeq.test" },
+    where: { email: "ministry.admin@tawtheeq.example" },
     update: {},
     create: {
       fullName: "Ministry Platform Analyst",
-      email: "ministry.admin@tawtheeq.test",
+      email: "ministry.admin@tawtheeq.example",
       passwordHash: await password("SEED_MINISTRY_ADMIN_PASSWORD"),
       role: UserRole.MINISTRY_ADMIN,
       phone: "+213555000005"
@@ -76,11 +76,11 @@ const main = async () => {
   });
 
   const studentUser = await prisma.user.upsert({
-    where: { email: "student@uap.test" },
+    where: { email: "student@tawtheeq.example" },
     update: {},
     create: {
       fullName: "Amina Benali",
-      email: "student@uap.test",
+      email: "student@tawtheeq.example",
       passwordHash: await password("SEED_STUDENT_PASSWORD"),
       role: UserRole.STUDENT,
       phone: "+213555000003",
@@ -108,11 +108,11 @@ const main = async () => {
   const end = new Date(start);
   end.setFullYear(end.getFullYear() + 1);
   await prisma.user.upsert({
-    where: { email: "institution@uap.test" },
+    where: { email: "institution@tawtheeq.example" },
     update: {},
     create: {
       fullName: "Institution Verification Officer",
-      email: "institution@uap.test",
+      email: "institution@tawtheeq.example",
       passwordHash: await password("SEED_INSTITUTION_PASSWORD"),
       role: UserRole.INSTITUTION,
       phone: "+213555000004",

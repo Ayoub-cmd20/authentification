@@ -80,15 +80,15 @@ npm run prisma:migrate
 npm run db:seed
 ```
 
-Seed accounts use `ChangeMe123!` unless overridden:
+Seed accounts use `Tawtheeq2026!Secure` unless overridden:
 
 | Role | Email |
 | --- | --- |
-| Super Admin | `super.admin@uap.test` |
-| Ministry Admin | `ministry.admin@tawtheeq.test` |
-| University Admin | `university.admin@uap.test` |
-| Student | `student@uap.test` |
-| Institution | `institution@uap.test` |
+| Super Admin | `super.admin@tawtheeq.example` |
+| Ministry Admin | `ministry.admin@tawtheeq.example` |
+| University Admin | `university.admin@tawtheeq.example` |
+| Student | `student@tawtheeq.example` |
+| Institution | `institution@tawtheeq.example` |
 
 ## Run
 

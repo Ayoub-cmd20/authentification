@@ -63,18 +63,18 @@ npm run dev:web
 
 ## 5. Test Accounts
 
-Default password: `ChangeMe123!`
+Default password: `Tawtheeq2026!Secure`
 
 | Role | Email |
 | --- | --- |
-| Super Admin | `super.admin@uap.test` |
-| University Admin | `university.admin@uap.test` |
-| Student | `student@uap.test` |
-| Institution | `institution@uap.test` |
+| Super Admin | `super.admin@tawtheeq.example` |
+| University Admin | `university.admin@tawtheeq.example` |
+| Student | `student@tawtheeq.example` |
+| Institution | `institution@tawtheeq.example` |
 
 ## 6. Student Workflow
 
-1. Log in as `student@uap.test`.
+1. Log in as `student@tawtheeq.example`.
 2. Open **Profile**.
 3. Fill or review personal and academic information.
 4. Open **Authentication file**.
@@ -89,7 +89,7 @@ Default password: `ChangeMe123!`
 
 ## 7. University Admin Workflow
 
-1. Log in as `university.admin@uap.test`.
+1. Log in as `university.admin@tawtheeq.example`.
 2. Open **Submissions**.
 3. Review a student submission.
 4. Download uploaded PDF documents.
@@ -106,7 +106,7 @@ Default password: `ChangeMe123!`
 
 ## 8. Institution Workflow
 
-1. Log in as `institution@uap.test`.
+1. Log in as `institution@tawtheeq.example`.
 2. Open **Verify graduate**.
 3. Search by:
    - student registration number
@@ -119,7 +119,7 @@ Default password: `ChangeMe123!`
 
 ## 9. Super Admin Workflow
 
-1. Log in as `super.admin@uap.test`.
+1. Log in as `super.admin@tawtheeq.example`.
 2. Open **Users** to activate or deactivate accounts.
 3. Open **Institutions** to manage institution accounts.
 4. Open **Requirements** to configure document requirements.
