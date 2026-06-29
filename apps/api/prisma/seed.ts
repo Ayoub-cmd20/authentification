@@ -85,10 +85,21 @@ const main = async () => {
   });
 
   const studentEmail = "student@tawtheeq.example";
+  const existingStudentProfile = await prisma.studentProfile.findUnique({
+    where: { nationalId: "NID-19990318-001" }
+  });
+
   let studentUser = await prisma.user.findUnique({
     where: { email: studentEmail },
     include: { studentProfile: true }
   });
+
+  if (!studentUser && existingStudentProfile) {
+    studentUser = await prisma.user.findUnique({
+      where: { id: existingStudentProfile.userId },
+      include: { studentProfile: true }
+    });
+  }
 
   if (studentUser) {
     studentUser = await prisma.user.update({
