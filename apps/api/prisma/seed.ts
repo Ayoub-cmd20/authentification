@@ -75,34 +75,52 @@ const main = async () => {
     }
   });
 
-  const studentUser = await prisma.user.upsert({
-    where: { email: "student@tawtheeq.example" },
-    update: {},
-    create: {
-      fullName: "Amina Benali",
-      email: "student@tawtheeq.example",
-      passwordHash: await password("SEED_STUDENT_PASSWORD"),
-      role: UserRole.STUDENT,
-      phone: "+213555000003",
-      studentProfile: {
-        create: {
-          dateOfBirth: new Date("1999-03-18"),
-          nationalId: "NID-19990318-001",
-          nin: "NID-19990318-001",
-          studentRegistrationNumber: "STU-2021-4455",
-          universityId: university.id,
-          university: "University of Algiers",
-          faculty: "Faculty of Sciences",
-          department: "Computer Science",
-          specialty: "Software Engineering",
-          graduationYear: 2021,
-          degreeType: "Master",
-          certificateNumber: "CERT-UA1-2021-0001"
-        }
-      }
-    },
+  const studentEmail = "student@tawtheeq.example";
+  let studentUser = await prisma.user.findUnique({
+    where: { email: studentEmail },
     include: { studentProfile: true }
   });
+
+  if (!studentUser) {
+    const existingStudentProfile = await prisma.studentProfile.findUnique({
+      where: { nationalId: "NID-19990318-001" }
+    });
+    if (existingStudentProfile) {
+      studentUser = await prisma.user.findUnique({
+        where: { id: existingStudentProfile.userId },
+        include: { studentProfile: true }
+      });
+    }
+  }
+
+  if (!studentUser) {
+    studentUser = await prisma.user.create({
+      data: {
+        fullName: "Amina Benali",
+        email: studentEmail,
+        passwordHash: await password("SEED_STUDENT_PASSWORD"),
+        role: UserRole.STUDENT,
+        phone: "+213555000003",
+        studentProfile: {
+          create: {
+            dateOfBirth: new Date("1999-03-18"),
+            nationalId: "NID-19990318-001",
+            nin: "NID-19990318-001",
+            studentRegistrationNumber: "STU-2021-4455",
+            universityId: university.id,
+            university: "University of Algiers",
+            faculty: "Faculty of Sciences",
+            department: "Computer Science",
+            specialty: "Software Engineering",
+            graduationYear: 2021,
+            degreeType: "Master",
+            certificateNumber: "CERT-UA1-2021-0001"
+          }
+        }
+      },
+      include: { studentProfile: true }
+    });
+  }
 
   const start = new Date();
   const end = new Date(start);
