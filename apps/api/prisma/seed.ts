@@ -30,7 +30,10 @@ const ensureSeedPdf = async (fileName: string, title: string) => {
 const main = async () => {
   const superAdmin = await prisma.user.upsert({
     where: { email: "super.admin@tawtheeq.example" },
-    update: {},
+    update: {
+      passwordHash: await password("SEED_SUPER_ADMIN_PASSWORD"),
+      isActive: true
+    },
     create: {
       fullName: "Platform Super Admin",
       email: "super.admin@tawtheeq.example",
@@ -42,7 +45,10 @@ const main = async () => {
 
   const universityAdmin = await prisma.user.upsert({
     where: { email: "university.admin@tawtheeq.example" },
-    update: {},
+    update: {
+      passwordHash: await password("SEED_UNIVERSITY_ADMIN_PASSWORD"),
+      isActive: true
+    },
     create: {
       fullName: "University Registrar Admin",
       email: "university.admin@tawtheeq.example",
@@ -54,7 +60,10 @@ const main = async () => {
 
   const ministryAdmin = await prisma.user.upsert({
     where: { email: "ministry.admin@tawtheeq.example" },
-    update: {},
+    update: {
+      passwordHash: await password("SEED_MINISTRY_ADMIN_PASSWORD"),
+      isActive: true
+    },
     create: {
       fullName: "Ministry Platform Analyst",
       email: "ministry.admin@tawtheeq.example",
@@ -81,16 +90,35 @@ const main = async () => {
     include: { studentProfile: true }
   });
 
-  if (!studentUser) {
-    const existingStudentProfile = await prisma.studentProfile.findUnique({
-      where: { nationalId: "NID-19990318-001" }
+  if (studentUser) {
+    studentUser = await prisma.user.update({
+      where: { id: studentUser.id },
+      data: {
+        passwordHash: await password("SEED_STUDENT_PASSWORD"),
+        isActive: true,
+        studentProfile: {
+          upsert: {
+            where: { userId: studentUser.id },
+            update: {},
+            create: {
+              dateOfBirth: new Date("1999-03-18"),
+              nationalId: "NID-19990318-001",
+              nin: "NID-19990318-001",
+              studentRegistrationNumber: "STU-2021-4455",
+              universityId: university.id,
+              university: "University of Algiers",
+              faculty: "Faculty of Sciences",
+              department: "Computer Science",
+              specialty: "Software Engineering",
+              graduationYear: 2021,
+              degreeType: "Master",
+              certificateNumber: "CERT-UA1-2021-0001"
+            }
+          }
+        }
+      },
+      include: { studentProfile: true }
     });
-    if (existingStudentProfile) {
-      studentUser = await prisma.user.findUnique({
-        where: { id: existingStudentProfile.userId },
-        include: { studentProfile: true }
-      });
-    }
   }
 
   if (!studentUser) {
@@ -127,7 +155,10 @@ const main = async () => {
   end.setFullYear(end.getFullYear() + 1);
   await prisma.user.upsert({
     where: { email: "institution@tawtheeq.example" },
-    update: {},
+    update: {
+      passwordHash: await password("SEED_INSTITUTION_PASSWORD"),
+      isActive: true
+    },
     create: {
       fullName: "Institution Verification Officer",
       email: "institution@tawtheeq.example",
